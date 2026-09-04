@@ -19,7 +19,7 @@ SC_MODULE(Software) {
     void run();
     tlm::tlm_sync_enum nb_transport_bw(tlm::tlm_generic_payload& trans, tlm::tlm_phase& phase, 
         sc_core::sc_time& delay);
-    sc_core::sc_time m_delay; //delay for the software module.
+    sc_core::sc_event m_resp_event;
 };
 
 
