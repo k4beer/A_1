@@ -24,11 +24,15 @@ SC_MODULE(CPU) {
     tlm::tlm_sync_enum nb_transport_fw(tlm::tlm_generic_payload &trans,tlm::tlm_phase &phase, sc_core::sc_time &delay);
     tlm::tlm_sync_enum nb_transport_bw(tlm::tlm_generic_payload &trans, tlm::tlm_phase &phase, sc_core::sc_time &delay);
     void peq_callback();
-
+    void forward_write(tlm::tlm_generic_payload &sw_trans);
+    void complete_response(tlm::tlm_generic_payload &sw_trans, sc_core::sc_time delay);
     static sc_core::sc_time opcode_delay(Operation op);
     static long compute(Operation op, long x, long y);
     tlm_utils::peq_with_get<tlm::tlm_generic_payload> m_peq;
-    
+
+    tlm::tlm_generic_payload m_mem_trans;
+    unsigned char m_write_buffer[sizeof(long)];
+    tlm::tlm_generic_payload *m_pending_sw_trans;
 };
 
 

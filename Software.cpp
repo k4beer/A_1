@@ -23,28 +23,34 @@ void Software::run() {
         tlm::tlm_sync_enum status = socket->nb_transport_fw(trans, phase, delay);
 
         if (status != tlm::TLM_COMPLETED) {
-            // The normal path now that Cpu schedules a real delay: wait
-            // for nb_transport_bw to deliver BEGIN_RESP later.
             wait(m_resp_event);
         }
 
         Command *ret = trans.get_extension<Command>();
 
-        // Lightweight check for now, just to eyeball correctness while
-        // verifying timing. The formal "print + exit on mismatch"
-        // self-check contract from the assignment lands in Phase 5.
-        long expected = 0;
-        switch (cmd.cmd) {
-            case Operation::ADD: expected = cmd.x + cmd.y;              break;
-            case Operation::SUB: expected = cmd.x - cmd.y;              break;
-            case Operation::EQ:  expected = (cmd.x == cmd.y) ? 1 : 0;   break;
-            case Operation::REM: expected = cmd.x % cmd.y;              break;
+        // Lightweight check for now -- the formal "print + exit on
+        // mismatch" self-check contract from the assignment lands in
+        // Phase 5.
+        bool ok;
+        if (ret->op == Operation::WRITE) {
+            ok = ret->valid;
+            std::cout << sc_core::sc_time_stamp() << " Software: write "
+                      << (ok ? "acked OK" : "FAILED") << std::endl;
+        } else {
+            long expected = 0;
+            switch (ret->op) {
+                case Operation::ADD: expected = cmd.x + cmd.y;            break;
+                case Operation::SUB: expected = cmd.x - cmd.y;            break;
+                case Operation::EQ:  expected = (cmd.x == cmd.y) ? 1 : 0; break;
+                case Operation::REM: expected = cmd.x % cmd.y;            break;
+                case Operation::WRITE: break; // handled above
+            }
+            ok = (ret->result == expected);
+            std::cout << sc_core::sc_time_stamp() << " Software: result = "
+                      << ret->result << " (expected " << expected << ") "
+                      << (ok ? "OK" : "MISMATCH") << std::endl;
         }
-        bool ok = (ret->result == expected);
         ok ? ++pass : ++fail;
-        std::cout << sc_core::sc_time_stamp() << " Software: result = "
-                  << ret->result << " (expected " << expected << ") "
-                  << (ok ? "OK" : "MISMATCH") << std::endl;
     }
 
     std::cout << "Done: " << pass << " passed, " << fail << " failed"

@@ -2,7 +2,7 @@
 #define Commands_h
 #include "tlm.h"
 
-enum class Operation {ADD, SUB, REM, EQ};
+enum class Operation {ADD, SUB, REM, EQ,WRITE};
 
 class Command : public tlm::tlm_extension<Command> {
     public :
