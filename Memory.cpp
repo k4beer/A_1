@@ -5,7 +5,9 @@ const sc_core::sc_time Memory::WRITE_DELAY = sc_core::sc_time(50, sc_core::SC_NS
 tlm::tlm_sync_enum Memory::nb_transport_fw(tlm::tlm_generic_payload &trans, tlm::tlm_phase &phase, sc_core::sc_time &delay) {
     if (phase == tlm::BEGIN_REQ) {
         sc_core::sc_time current_time = sc_core::sc_time_stamp();
-        sc_core::sc_time ack_delay = (current_time > m_busy_until) ? (m_busy_until-current_time) : sc_core::SC_ZERO_TIME;
+        sc_core::sc_time ack_delay = (current_time < m_busy_until)
+                                  ? (m_busy_until - current_time)
+                                  : sc_core::SC_ZERO_TIME;
        if (ack_delay == sc_core::SC_ZERO_TIME) {
             std::cout << current_time << " Memory: free, ack now" << std::endl;
         } else {
