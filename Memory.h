@@ -7,13 +7,13 @@
 
 SC_MODULE(Memory) {
     public:
-    tlm_utils::simple_target_socket<Memory> socket;
+    tlm_utils::simple_target_socket<Memory> socket; //making the socket public so the CPU can bind to it
 
     SC_CTOR(Memory) : socket("socket") , m_busy_until(sc_core::SC_ZERO_TIME), m_ack_peq("m_ack_peq") {
         socket.register_nb_transport_fw(this, &Memory::nb_transport_fw);
         SC_METHOD(ack_peq_callback);
-        sensitive << m_ack_peq.get_event();
-        dont_initialize();
+        sensitive << m_ack_peq.get_event(); // making memory sensitive to the ack_peq event queue
+        dont_initialize(); // prevent the method from being called at time 0
     }
 
     private:
