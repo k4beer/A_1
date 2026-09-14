@@ -8,26 +8,15 @@
 #include "Memory.h"
 #include "Trial.h"
 
-// Task 3: identical benchmark to Task 2 -- same 14-command sequence
-// shape, same rng_seed (so the exact same 10000 randomized sequences
-// get generated), same iteration count -- but built against
-// SoftwareTemporal.cxx and CpuTemporal.cxx instead of the plain
-// Software.cxx/Cpu.cxx. Memory.cxx is reused completely unchanged:
-// its busy/ack contract needs real global time, so it can't be
-// decoupled (see the writeup for why).
+
 int sc_main(int argc, char *argv[]) {
-    // How far local time is allowed to run ahead of the kernel's clock
-    // before Software is forced to sync. Generous relative to our
-    // per-opcode delays (4-15ns) -- in practice, the pre-write sync
-    // fires far more often than this quantum ever will for this
-    // particular command sequence.
     tlm::tlm_global_quantum::instance().set(sc_core::sc_time(100, sc_core::SC_NS));
 
     SoftwareConfig cfg;
     cfg.mode             = RunMode::RANDOM;
     cfg.iterations       = 10000;
-    cfg.rng_seed         = 42;    // must match Task 2's seed for a fair comparison
-    cfg.verbose          = false; // same as Task 2 -- keep I/O overhead comparable
+    cfg.rng_seed         = 42;    // matches task 2 seed
+    cfg.verbose          = false; 
     cfg.exit_on_mismatch = false;
 
     Software sw("sw", cfg);

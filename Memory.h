@@ -17,9 +17,11 @@ SC_MODULE(Memory) {
     }
 
     private:
+    //peq is used to schedule the ack callback after the write delay. This allows us to simulate 
+    // the memory being busy for a certain amount of time before acknowledging the write.
     tlm::tlm_sync_enum nb_transport_fw(tlm::tlm_generic_payload &trans, tlm::tlm_phase &phase, sc_core::sc_time &delay);
     void ack_peq_callback();
-    tlm_utils::peq_with_get<tlm::tlm_generic_payload> m_ack_peq;
+    tlm_utils::peq_with_get<tlm::tlm_generic_payload> m_ack_peq; 
     sc_core::sc_time m_busy_until;
     static const sc_core::sc_time WRITE_DELAY;
 };

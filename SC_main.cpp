@@ -5,7 +5,7 @@
 
 int sc_main(int argc, char *argv[]) {
     SoftwareConfig cfg;
-    cfg.mode             = RunMode::TEST;
+    cfg.mode             = RunMode::TEST; //this simulates the basic test for 14 commands
     cfg.verbose          = true;
     cfg.exit_on_mismatch = true;
 
@@ -13,8 +13,8 @@ int sc_main(int argc, char *argv[]) {
     CPU      cpu("cpu");
     Memory   mem("mem");
 
-    sw.socket.bind(cpu.targ_socket);
-    cpu.init_socket.bind(mem.socket);
+    sw.socket.bind(cpu.targ_socket); //binding the software socket to the CPU target socket
+    cpu.init_socket.bind(mem.socket); //binding the CPU initiator socket to the memory socket
 
     sc_start();
 

@@ -9,21 +9,21 @@
 
 SC_MODULE(CPU) {
     public:
-    tlm_utils::simple_target_socket<CPU> targ_socket;
-    tlm_utils::simple_initiator_socket<CPU> init_socket;
+    tlm_utils::simple_target_socket<CPU> targ_socket; //CPU is target for Software
+    tlm_utils::simple_initiator_socket<CPU> init_socket; //CPU is initiator for Memory
 
     SC_CTOR(CPU) : targ_socket("targ_socket"), init_socket("init_socket") , m_peq("m_peq") {
-        targ_socket.register_nb_transport_fw(this, &CPU::nb_transport_fw);
-        init_socket.register_nb_transport_bw(this, &CPU::nb_transport_bw);
+        targ_socket.register_nb_transport_fw(this, &CPU::nb_transport_fw); // Register forward transport method
+        init_socket.register_nb_transport_bw(this, &CPU::nb_transport_bw); // Register backward transport method
         SC_METHOD(peq_callback);
-        sensitive << m_peq.get_event();
+        sensitive << m_peq.get_event(); //Senstive to the events in teh peq queue. 
         dont_initialize();
     }
     private:
     
     tlm::tlm_sync_enum nb_transport_fw(tlm::tlm_generic_payload &trans,tlm::tlm_phase &phase, sc_core::sc_time &delay);
     tlm::tlm_sync_enum nb_transport_bw(tlm::tlm_generic_payload &trans, tlm::tlm_phase &phase, sc_core::sc_time &delay);
-    void peq_callback();
+    void peq_callback(); 
     void forward_write(tlm::tlm_generic_payload &sw_trans);
     void complete_response(tlm::tlm_generic_payload &sw_trans, sc_core::sc_time delay);
     static sc_core::sc_time opcode_delay(Operation op);
@@ -32,7 +32,7 @@ SC_MODULE(CPU) {
 
     tlm::tlm_generic_payload m_mem_trans;
     unsigned char m_write_buffer[sizeof(long)];
-    tlm::tlm_generic_payload *m_pending_sw_trans;
+    tlm::tlm_generic_payload *m_pending_sw_trans; 
 };
 
 

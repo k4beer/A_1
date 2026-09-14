@@ -3,16 +3,11 @@
 #include "Software.h"
 #include "tlm_utils/tlm_quantumkeeper.h"
 
-// Temporal-decoupling variant of Software (same class, same Software.h
-// -- this file is linked INSTEAD OF Software.cxx for Task 3).
-//
+// Temporal-decoupling variant of Software 
 // The quantum keeper lives here as a file-scope object rather than as a
-// Software member, specifically so Software.h never has to change: only
-// one Software object ever exists in any of these simulations, so a
-// file-scope instance behaves exactly like a member would, without
-// touching the already-tested header.
+// Software member, specifically so Software.h never has to change
 namespace {
-tlm_utils::tlm_quantumkeeper g_qk;
+tlm_utils::tlm_quantumkeeper g_qk; //allows the Software module to run ahead of the SystemC kernel clock
 }
 
 void Software::run() {
@@ -43,19 +38,18 @@ void Software::run_once(const std::vector<Opcode> &commands) {
         trans.set_extension(ext);
 
         if (cmd.cmd == Operation::WRITE && g_qk.get_local_time() != sc_core::SC_ZERO_TIME) {
-            // Memory's busy contract needs the real kernel clock -- flush
-            // any accumulated local time before this request can reach it.
+            // Memory's busy contract needs the real kernel clock to work so we flsuh before sending to memory
             if (m_cfg.verbose) {
                 std::cout << sc_core::sc_time_stamp()
                           << " Software: syncing " << g_qk.get_local_time()
                           << " of accumulated local time before a write"
                           << std::endl;
             }
-            g_qk.sync();
+            g_qk.sync(); //sync the time to kernel clock
         }
 
         tlm::tlm_phase   phase = tlm::BEGIN_REQ;
-        sc_core::sc_time delay = g_qk.get_local_time();
+        sc_core::sc_time delay = g_qk.get_local_time(); 
 
         if (m_cfg.verbose) {
             std::cout << sc_core::sc_time_stamp() << " Software: sending command"
@@ -65,14 +59,13 @@ void Software::run_once(const std::vector<Opcode> &commands) {
 
         if (status == tlm::TLM_COMPLETED) {
             // Arithmetic path: Cpu answered inline and handed back the
-            // updated local-time offset via 'delay'. Store it instead of
-            // calling wait() for it -- that's the actual decoupling.
+            // updated local-time offset via 'delay'. 
             g_qk.set(delay);
             if (g_qk.need_sync()) {
                 g_qk.sync();
             }
         } else {
-            // Write path: really has to block for Memory's real ack.
+            // Write path really has to block for Memory's real ack.
             wait(m_resp_event);
             g_qk.reset(); // kernel clock and our local "now" agree again
         }
@@ -120,6 +113,7 @@ void Software::run_once(const std::vector<Opcode> &commands) {
     m_total_time += sc_core::sc_time_stamp() - start;
 }
 
+//nb_transport_bw function for software-cpu communication
 tlm::tlm_sync_enum Software::nb_transport_bw(tlm::tlm_generic_payload &trans,
                                               tlm::tlm_phase &phase,
                                               sc_core::sc_time &delay) {

@@ -1,6 +1,8 @@
 #include "Cpu.h"
 #include <iostream>
 
+//add the custom delay for each opcode. This is used to simulate the time taken by the CPU to 
+//process each operation.
 sc_core::sc_time CPU::opcode_delay(Operation op) {
     switch(op) {
         case Operation::ADD:
@@ -17,6 +19,8 @@ sc_core::sc_time CPU::opcode_delay(Operation op) {
     return sc_core::SC_ZERO_TIME;
 }
 
+//this is for computation of the result of the operation. This is used to simulate the
+// CPU processing the operation and generating a result.
 long CPU::compute(Operation op, long x, long y) {
     switch(op) {
         case Operation::ADD:
@@ -33,7 +37,9 @@ long CPU::compute(Operation op, long x, long y) {
     return 0;
 }
 
-
+//nb_transport_fw is the forward transport method for the CPU. It is called by the Software 
+//module when it wants to send a command to the CPU. The CPU will process the command and send a
+// response back to the Software module.
 tlm::tlm_sync_enum CPU::nb_transport_fw(tlm::tlm_generic_payload &trans, tlm::tlm_phase &phase, sc_core::sc_time &delay) {
     if(phase == tlm::BEGIN_REQ) {
         Command *ext = trans.get_extension<Command>();
